@@ -78,6 +78,7 @@ public:
     std::string const& error() const { return m_error; }
     double progressFraction() const;
     std::string statusSummary() const;
+    std::string statusText() const { return statusSummary(); }
 
     // Advance the state machine by one simulation tick or state transition.
     void step(SimulationBackend& backend);

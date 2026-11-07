@@ -45,6 +45,9 @@ struct FrameCategory {
     std::string shortLabel() const {
         return std::to_string(frames) + "F";
     }
+    std::string label() const {
+        return shortLabel();
+    }
 
     // Full sound guide label, e.g. "12-frame window", "1-frame window"
     std::string guideDescription() const {
@@ -62,6 +65,15 @@ public:
     std::vector<FrameCategory> enabledCategoriesAscending() const;
     std::vector<FrameCategory> enabledCategoriesDescending() const;
 
+    FrameCategory const* findCategory(int frames) const { return find(frames); }
+
+    static std::string labelForFrames(int frames) {
+        return std::to_string(frames) + "F";
+    }
+    static std::string guideDescriptionForFrames(int frames) {
+        return std::to_string(frames) + "-frame window";
+    }
+
     bool setCategoryEnabled(int frames, bool enabled);
     bool isCategoryEnabled(int frames) const;
 
@@ -74,6 +86,7 @@ public:
     bool clearCategoryCustomColor(int frames);
 
     bool setCategoryCustomSound(int frames, std::string const& path);
+    bool clearCategoryCustomSound(int frames) { return setCategoryCustomSound(frames, ""); }
     std::string getCategoryCustomSound(int frames) const;
 
     void setTierColors(TierColors const& colors) { m_tierColors = colors; }
@@ -90,6 +103,9 @@ public:
 
     // Frequency in Hz for the synthesized built-in ding of a category
     double frequencyHzForFrames(int frames) const;
+    float pitchHzForFrames(int frames) const {
+        return static_cast<float>(frequencyHzForFrames(frames));
+    }
 
     // FMOD playback speed/pitch multiplier when using a single custom sound file
     float fmodPitchMultiplierForFrames(int frames) const;

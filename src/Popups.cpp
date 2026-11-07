@@ -364,7 +364,8 @@ void CategoryConfigPopup::rebuildList() {
 
         // Pitch / Custom sound info text
         float hz = ModState::get().categories().pitchHzForFrames(cat.frames);
-        std::string infoStr = cat.hasCustomSound ? "Custom WAV" : fmt::format("{:.0f} Hz", hz);
+        bool hasSnd = !cat.customSoundPath.empty();
+        std::string infoStr = hasSnd ? "Custom WAV" : fmt::format("{:.0f} Hz", hz);
         auto* infoLbl = CCLabelBMFont::create(infoStr.c_str(), "chatFont.fnt");
         infoLbl->setScale(0.50f);
         infoLbl->setAnchorPoint({0.0f, 0.5f});
@@ -395,9 +396,9 @@ void CategoryConfigPopup::rebuildList() {
 
         // Custom sound file assignment button
         auto* sndSpr = ButtonSprite::create(
-            cat.hasCustomSound ? "Snd*" : "Snd",
+            hasSnd ? "Snd*" : "Snd",
             "goldFont.fnt",
-            cat.hasCustomSound ? "GJ_button_03.png" : "GJ_button_04.png",
+            hasSnd ? "GJ_button_03.png" : "GJ_button_04.png",
             0.65f
         );
         sndSpr->setScale(0.44f);
@@ -407,7 +408,7 @@ void CategoryConfigPopup::rebuildList() {
         rowMenu->addChild(sndBtn);
 
         // Delete button for custom categories (>12F)
-        if (!cat.isDefault) {
+        if (cat.isCustom) {
             auto* delSpr = ButtonSprite::create("X", "goldFont.fnt", "GJ_button_06.png", 0.65f);
             delSpr->setScale(0.42f);
             auto* delBtn = CCMenuItemSpriteExtra::create(delSpr, this, menu_selector(CategoryConfigPopup::onDeleteCustomCategory));
@@ -503,7 +504,7 @@ void CategoryConfigPopup::onPickCustomSound(CCObject* sender) {
     if (!cat) return;
 
     // If a custom sound is already set, clicking again clears it back to built-in pitched ding
-    if (cat->hasCustomSound) {
+    if (!cat->customSoundPath.empty()) {
         cats.clearCategoryCustomSound(frames);
         ModState::get().saveCategoryConfig();
         Notification::create(fmt::format("Reset {} to built-in pitched ding", CategoryConfig::labelForFrames(frames)), NotificationIcon::Info)->show();

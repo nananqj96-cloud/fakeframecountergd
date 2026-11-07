@@ -23,7 +23,7 @@ std::string SoundManager::resolveSoundPath(int frames, float& outSpeedMultiplier
 
     // 1. Check per-category custom sound path
     if (auto const* cat = cats.findCategory(frames)) {
-        if (cat->hasCustomSound && !cat->customSoundPath.empty()) {
+        if (!cat->customSoundPath.empty()) {
             std::error_code ec;
             if (std::filesystem::exists(cat->customSoundPath, ec)) {
                 outSpeedMultiplier = 1.0f;
