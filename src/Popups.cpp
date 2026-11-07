@@ -807,7 +807,7 @@ void FFCPopup::refreshUI() {
         m_macroFileLabel->setString(mp.macro()->name.c_str());
         m_macroDetailsLabel->setString(
             fmt::format("{} | {} inputs | {:.0f} TPS",
-                macroFormatName(mp.macro()->format),
+                mp.macro()->format,
                 mp.macro()->inputs.size(),
                 mp.effectiveTps()
             ).c_str()

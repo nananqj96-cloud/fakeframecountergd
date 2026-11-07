@@ -15,6 +15,13 @@ enum class PlaybackState : uint8_t {
     Finished = 2,
 };
 
+struct DueMacroAction {
+    uint8_t button = 1;
+    bool player2 = false;
+    bool down = true;
+    size_t macroIndex = 0;
+};
+
 class MacroPlayer {
 public:
     using InjectFn = std::function<void(MacroInput const& input, size_t inputIndex)>;
@@ -23,6 +30,16 @@ public:
 
     void setMacro(MacroData macro, std::string path = "");
     void clearMacro();
+
+    bool loadFromFile(std::filesystem::path const& path, std::string& outError) {
+        auto res = loadMacroFromFile(path);
+        if (!res.ok) {
+            outError = res.error;
+            return false;
+        }
+        setMacro(std::move(res.macro), path.string());
+        return true;
+    }
 
     bool hasMacro() const { return m_macro.has_value() && !m_macro->inputs.empty(); }
     MacroData const* macro() const { return m_macro ? &(*m_macro) : nullptr; }
@@ -35,6 +52,19 @@ public:
     PlaybackState state() const { return m_state; }
     bool isPlaying() const { return m_state == PlaybackState::Playing; }
     bool isFinished() const { return m_state == PlaybackState::Finished; }
+
+    std::string statusSummary() const {
+        if (!hasMacro()) return "State: Idle (No macro)";
+        switch (m_state) {
+            case PlaybackState::Playing:
+                return "State: Playing (" + std::to_string(m_cursor) + "/" + std::to_string(totalInputs()) + ")";
+            case PlaybackState::Finished:
+                return "State: Finished (" + std::to_string(totalInputs()) + " inputs)";
+            case PlaybackState::Stopped:
+            default:
+                return "State: Ready (" + std::to_string(totalInputs()) + " inputs)";
+        }
+    }
 
     void setFrameOffset(int offset) { m_frameOffset = offset; }
     int frameOffset() const { return m_frameOffset; }
@@ -53,6 +83,14 @@ public:
     // Called inside GJBaseGameLayer::processCommands on each physics step.
     // Returns the number of macro inputs injected on this tick.
     size_t onProcessTick(int64_t currentProgress, InjectFn const& inject);
+
+    std::vector<DueMacroAction> collectDueInputs(int64_t currentProgress) {
+        std::vector<DueMacroAction> out;
+        onProcessTick(currentProgress, [&out](MacroInput const& inp, size_t idx) {
+            out.push_back(DueMacroAction{inp.button, inp.player2, inp.down, idx});
+        });
+        return out;
+    }
 
 private:
     std::optional<MacroData> m_macro;
