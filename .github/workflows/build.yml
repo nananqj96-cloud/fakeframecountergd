@@ -1,0 +1,44 @@
+name: Build Geode Mod & Run Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  unit-tests:
+    name: Core Unit Tests (C++23)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure and Build Core Tests
+        run: |
+          cmake -B build-tests -DFFC_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-tests --config Release
+      - name: Run Core Unit Tests
+        run: ./build-tests/ffc_core_tests
+
+  build:
+    name: Build Geode Package
+    needs: unit-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: Win64
+          - os: macos-latest
+            target: MacOS
+          - os: ubuntu-latest
+            target: Android64
+          - os: ubuntu-latest
+            target: Android32
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Geode Mod
+        uses: geode-sdk/build-geode-mod@main
+        with:
+          single-Target: ${{ matrix.target }}
+          combine: true

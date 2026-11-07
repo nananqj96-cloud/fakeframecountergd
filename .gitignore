@@ -1,0 +1,11 @@
+build/
+build-tests/
+.cache/
+.vscode/
+.idea/
+*.o
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib

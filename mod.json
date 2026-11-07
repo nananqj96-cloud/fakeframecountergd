@@ -1,0 +1,285 @@
+{
+	"geode": "5.11.2",
+	"gd": {
+		"win": "2.2081",
+		"android": "2.2081",
+		"mac": "2.2081",
+		"ios": "2.2081"
+	},
+	"id": "nananqj96.fake-frame-counter",
+	"name": "Fake Frame Counter",
+	"version": "v1.0.0",
+	"developer": "nananqj96",
+	"description": "Displays clean in-world frame-window circles (1F-12F+), pitched ding sounds, a top-right counter, and Mega Hack macro playback. Uses simulated visual estimates by default.",
+	"tags": [
+		"gameplay",
+		"interface",
+		"utility"
+	],
+	"links": {
+		"source": "https://github.com/nananqj96-cloud/fakeframecountergd"
+	},
+	"dependencies": {
+		"geode.node-ids": ">=v1.23.3"
+	},
+	"resources": {
+		"files": [
+			"resources/*.wav"
+		]
+	},
+	"settings": {
+		"mode-disclosure-info": {
+			"type": "info",
+			"description": "<cy>Disclosure:</c> In <cg>Fake / Visual Estimate</c> mode (the primary mode), frame-window numbers (<cr>1F</c>-<cb>12F+</c>) are <co>simulated estimates</c> generated from obstacle proximity, movement dynamics, and configurable rules for visual fun—not verified frame-perfect physics calculations. Gameplay overlays omit disclaimer text to stay clean."
+		},
+		"general-title": {
+			"type": "title",
+			"name": "General & Mode"
+		},
+		"enabled": {
+			"type": "bool",
+			"name": "Enable Mod",
+			"description": "Master switch to enable or disable Fake Frame Counter during gameplay and macro playback.",
+			"default": true
+		},
+		"analysis-mode": {
+			"type": "string",
+			"name": "Window Calculation Mode",
+			"description": "Fake / Visual Estimate (Primary): generates plausible simulated estimates independently in live play and macro playback. Real Analysis (Experimental): uses step-perturbation macro simulation when a macro is scanned from 0%.",
+			"default": "Fake / Visual Estimate (Simulated)",
+			"one-of": [
+				"Fake / Visual Estimate (Simulated)",
+				"Real Analysis (Experimental Macro Scan)"
+			]
+		},
+		"open-menu-keybind": {
+			"type": "keybind",
+			"name": "Open FFC Menu Popup",
+			"description": "Keybind to open the Fake Frame Counter control, category, sound guide, and macro menu while in a level.",
+			"default": "F8",
+			"category": "gameplay"
+		},
+		"toggle-overlay-keybind": {
+			"type": "keybind",
+			"name": "Toggle Overlay Visibility",
+			"description": "Quickly show or hide the in-world circles and top-right counter while playing.",
+			"default": "F7",
+			"category": "gameplay"
+		},
+		"detection-title": {
+			"type": "title",
+			"name": "Detection & Anti-Spam Filter"
+		},
+		"sensitivity-preset": {
+			"type": "string",
+			"name": "Detection Sensitivity",
+			"description": "Selective: only close-hazard, orb/portal, or sharp maneuver moments. Balanced: filters out open-space fluff while preserving rapid sequences. Permissive: labels almost all distinct non-duplicate inputs.",
+			"default": "Balanced",
+			"one-of": [
+				"Selective",
+				"Balanced",
+				"Permissive"
+			]
+		},
+		"sensitivity-bias": {
+			"type": "float",
+			"name": "Sensitivity Fine Tuning",
+			"description": "Fine-tune moment selection (0.0 = most selective, 0.5 = default, 1.0 = most permissive).",
+			"default": 0.5,
+			"min": 0.0,
+			"max": 1.0,
+			"control": {
+				"slider": true,
+				"slider-step": 0.05
+			}
+		},
+		"release-filter": {
+			"type": "string",
+			"name": "Release Detection",
+			"description": "Smart: only labels releases in modes where releasing changes physics (Wave, Ship, active Dash orb, rising Robot jump). Prevents double-circle spam on Cube/Ball/UFO/Spider.",
+			"default": "Smart (Wave/Ship/Dash/Robot)",
+			"one-of": [
+				"Smart (Wave/Ship/Dash/Robot)",
+				"Presses Only",
+				"All Releases"
+			]
+		},
+		"max-moments-per-second": {
+			"type": "float",
+			"name": "Max Moment Density (per sec)",
+			"description": "Maximum labeled moments per second over a sliding 1s window. Preserves short rapid bursts while preventing screen clutter during sustained spam.",
+			"default": 8.0,
+			"min": 1.0,
+			"max": 25.0,
+			"control": {
+				"slider": true,
+				"slider-step": 1.0
+			}
+		},
+		"min-distance-units": {
+			"type": "float",
+			"name": "Min Circle Spacing (Units)",
+			"description": "Minimum world-space distance between consecutive circles (30 units = 1 block). Prevents overlapping circles at the same spot.",
+			"default": 18.0,
+			"min": 0.0,
+			"max": 90.0,
+			"control": {
+				"slider": true,
+				"slider-step": 2.0
+			}
+		},
+		"proximity-scale-units": {
+			"type": "float",
+			"name": "Hazard Proximity Range (Units)",
+			"description": "Distance scale (in level units; 30 = 1 block) used to evaluate nearby hazards and solids.",
+			"default": 135.0,
+			"min": 30.0,
+			"max": 300.0,
+			"control": {
+				"slider": true,
+				"slider-step": 5.0
+			}
+		},
+		"appearance-title": {
+			"type": "title",
+			"name": "Circles, Colors & Counter"
+		},
+		"show-circles": {
+			"type": "bool",
+			"name": "Show In-World Circles",
+			"description": "Show colored circles and frame-window labels (e.g. 1F, 4F, 12F) at the gameplay location.",
+			"default": true
+		},
+		"circle-scale": {
+			"type": "float",
+			"name": "Circle & Label Size",
+			"description": "Scale multiplier for the in-world circles and their frame labels.",
+			"default": 1.0,
+			"min": 0.4,
+			"max": 2.5,
+			"control": {
+				"slider": true,
+				"slider-step": 0.05
+			}
+		},
+		"show-counter": {
+			"type": "bool",
+			"name": "Show Top-Right Counter",
+			"description": "Display the compact total and per-category frame-window counter in the top-right corner.",
+			"default": true
+		},
+		"counter-scale": {
+			"type": "float",
+			"name": "Counter Scale",
+			"description": "Scale multiplier for the top-right counter.",
+			"default": 1.0,
+			"min": 0.4,
+			"max": 2.0,
+			"control": {
+				"slider": true,
+				"slider-step": 0.05
+			}
+		},
+		"counter-hide-zero": {
+			"type": "bool",
+			"name": "Hide Zero-Count Categories",
+			"description": "Only show enabled categories in the top-right counter once their count is at least 1.",
+			"default": false
+		},
+		"color-tier-1-4": {
+			"type": "rgb",
+			"name": "1F-4F Color (Default Red)",
+			"description": "Color for 1F through 4F circles, labels, and counter rows.",
+			"default": [255, 59, 48]
+		},
+		"color-tier-5-6": {
+			"type": "rgb",
+			"name": "5F-6F Color (Default Orange)",
+			"description": "Color for 5F through 6F circles, labels, and counter rows.",
+			"default": [255, 149, 0]
+		},
+		"color-tier-7-9": {
+			"type": "rgb",
+			"name": "7F-9F Color (Default Yellow)",
+			"description": "Color for 7F through 9F circles, labels, and counter rows.",
+			"default": [255, 204, 0]
+		},
+		"color-tier-10-12": {
+			"type": "rgb",
+			"name": "10F-12F+ Color (Default Blue)",
+			"description": "Color for 10F through 12F (and custom >12F) circles, labels, and counter rows.",
+			"default": [50, 173, 230]
+		},
+		"sound-title": {
+			"type": "title",
+			"name": "Ding Sounds & Pitch"
+		},
+		"sound-enabled": {
+			"type": "bool",
+			"name": "Enable Ding Sounds",
+			"description": "Play a pitched ding sound whenever a frame-window circle appears.",
+			"default": true
+		},
+		"sound-volume": {
+			"type": "float",
+			"name": "Ding Volume",
+			"description": "Volume multiplier for category ding sounds and the Sound Preview Guide.",
+			"default": 0.85,
+			"min": 0.0,
+			"max": 1.0,
+			"control": {
+				"slider": true,
+				"slider-step": 0.05
+			}
+		},
+		"pitch-direction": {
+			"type": "string",
+			"name": "Category Pitch Order",
+			"description": "Default: 12F has the highest pitch and steps down progressively to 1F (lowest pitch).",
+			"default": "12F Highest -> 1F Lowest (Default)",
+			"one-of": [
+				"12F Highest -> 1F Lowest (Default)",
+				"1F Highest -> 12F Lowest"
+			]
+		},
+		"custom-global-sound": {
+			"type": "file",
+			"name": "Optional Global Custom Ding Sound",
+			"description": "Optional custom .wav/.ogg/.mp3 sound file used as the base ding (modulated by each category's pitch unless overridden per category in the FFC menu).",
+			"default": "",
+			"control": {
+				"dialog": "open",
+				"filters": [
+					{
+						"description": "Audio Files",
+						"files": ["*.wav", "*.ogg", "*.mp3"]
+					}
+				]
+			}
+		},
+		"macro-title": {
+			"type": "title",
+			"name": "Macro Playback"
+		},
+		"macro-lock-delta": {
+			"type": "bool",
+			"name": "Lock Physics Step to Macro TPS",
+			"description": "While playing back a macro, lock GJBaseGameLayer::getModifiedDelta to 1 / macro TPS for deterministic tick timing.",
+			"default": true
+		},
+		"macro-auto-replay": {
+			"type": "bool",
+			"name": "Auto-Restart Playback on Reset",
+			"description": "Automatically restart macro playback from tick 0 when the level resets while playback is active.",
+			"default": true
+		},
+		"macro-frame-offset": {
+			"type": "int",
+			"name": "Macro Frame Offset",
+			"description": "Tick offset applied to macro inputs during playback (-10 to +10). Adjust if a bot recorded frame 1 as tick 0.",
+			"default": 0,
+			"min": -10,
+			"max": 10
+		}
+	}
+}
